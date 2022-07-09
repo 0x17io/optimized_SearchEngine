@@ -1,53 +1,56 @@
-def rankBySecondElem(list):
-    """
-    Helper function to be used in cosineSimRanking.
-    :param list: list of the form [[docid1, rankingScore1], [docod2, rankingScore2]...
-    :return: Sorted list by second entry.
-    """
-    return list[1]
+import numpy as np
 
-def wordBasedCorrelation(query, invertedIndex, docTable, rankedDocList):
-    topRankedPagesA = [page[0] for page in rankedDocList][:2]
+def wordBasedCorrelation(invertedIndex, docTable):
+    wordBasedCorrelationDic = {}
 
-    extractedKeyWordsK = []
+    #print(invertedIndex)
+    for keyWord in invertedIndex.keys():
+        keyWordDocSet = invertedIndex[keyWord]['doc id']
+        for wordEntry in invertedIndex.keys():
+            wordEntryDocSet = invertedIndex[wordEntry]['doc id']
 
-    for page in topRankedPagesA:
-        extractedKeyWordsK.append(list(docTable[page]['extended table'].keys()))
-    extractedKeyWordsK = list(set(sum(extractedKeyWordsK, [])))
-
-    correlationWords = {}
-
-    for docID in topRankedPagesA:
-        for word in query:
-            if word not in docTable[docID]['extended table'].keys():
-                continue
-            for keyword in extractedKeyWordsK:
-                if keyword not in docTable[docID]['extended table'].keys():
-                    continue
-                word_tf_idf = invertedIndex[word]['doc id'][docID]['tf-idf']
-                key_tf_idf = invertedIndex[keyword]['doc id'][docID]['tf-idf']
-                if keyword not in correlationWords:
-                    correlationWords[keyword] = word_tf_idf * key_tf_idf
+            inner_product = sum({docID:keyWordDocSet[docID].get('tf-idf',0)*wordEntryDocSet[docID].get('tf-idf',0) \
+                   for docID in set(keyWordDocSet.keys() & wordEntryDocSet.keys()) }.values())
+            if inner_product != 0:
+                if keyWord not in wordBasedCorrelationDic:
+                    wordBasedCorrelationDic[keyWord] = [[wordEntry, inner_product]]
                 else:
-                    correlationWords[keyword] += word_tf_idf * key_tf_idf
-    top_words = list(map(list, sorted(list(correlationWords.items()), key=rankBySecondElem, reverse=True)))[:5]
-    top_words = [word[0] for word in top_words]
-    return top_words[:5]
+                    wordBasedCorrelationDic[keyWord].append([wordEntry, inner_product])
 
-def docBasedCorrelation(query, invertedIndex, docTable, rankedDocList):
-    topPagesA = [page[0] for page in rankedDocList]
-    print(topPagesA)
+        # print(wordBasedCorrelationDic)
+    #print(wordBasedCorrelationDic)
+    return wordBasedCorrelationDic
+    # for item, value in wordBasedCorrelationDic.items():
+    #     print(str(item), sorted(value, key = lambda x: x[1], reverse=True))
+
+def docBasedCorrelation(docTable):
+    # topPagesA = [page[0] for page in rankedDocList]
+    # print(topPagesA)
     documenCorrelation = {}
-    for docID in topPagesA:
-        topPagesAset = set(docTable[docID]['extended table'].keys())
-        for docIDInDocTable in docTable.keys():
-            genDoc = set(docTable[docIDInDocTable]['extended table'].keys())
-            if docID not in documenCorrelation:
-                #topPagesAset = set(docTable[])
-                documenCorrelation[docID] = docTable[['extended table']]
-            else:
-                continue
+    for docID in docTable.keys():
+        docIDName = docID
+        docID = docTable[docID]['extended table']
 
-        print(docID)
-        print(docTable[docID])
-
+        for docIDEntry in docTable.keys():
+            docIDEntryName = docIDEntry
+            docIDEntry = docTable[docIDEntry]['extended table']
+            inner_product = sum({word: docID[word].get('tf-idf', 0) * docIDEntry[word].get('tf-idf', 0) \
+                                 for word in (set(docID.keys()) & set(docIDEntry.keys()))}.values())
+            # docID[word].get('tf-idf', 0) * docIDEntry[word].get('tf-idf', 0)
+            if inner_product != 0:
+                if docIDName not in documenCorrelation:
+                    documenCorrelation[docIDName] = [[docIDEntryName, inner_product]]
+                else:
+                    documenCorrelation[docIDName].append([docIDEntryName, inner_product])
+            # if docID not in documenCorrelation:
+            #     #topPagesAset = set(docTable[])
+            #     documenCorrelation[docID] = docTable[['extended table']]
+            # else:
+            #     continue
+    for item, value in documenCorrelation.items():
+        print(str(item), sorted(value, key = lambda x: x[1], reverse=True))
+    # print(docID)
+    # print(docTable[docID])
+    print("---proof")
+    for item, value in docTable.items():
+        print(str(item), value['extended table'])
