@@ -1,12 +1,23 @@
-import numpy as np
+# Similar to stop words in main, but added the 'and' 'or', 'but' entries
+stop_words = ['the', 'be', 'to', 'of', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he',
+              'as', 'you', 'do', 'at', 'this', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she',
+              'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about',
+              'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know',
+              'take', 'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than',
+              'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two',
+              'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give',
+              'day', 'most', 'us', 'and', 'or', 'but']
 
-def wordBasedCorrelation(invertedIndex, docTable):
+def wordBasedCorrelation(invertedIndex, query, topRanked, docTable):
     wordBasedCorrelationDic = {}
-
-    #print(invertedIndex)
-    for keyWord in invertedIndex.keys():
+    topRankedA = topRanked[:5] # top 5 ranked pages
+    kList = []
+    for document in topRankedA:
+        kList.append(list(docTable[document[0]]['extended table'].keys()))
+    kListAsSet = set(sum(kList,[]))
+    for keyWord in query:
         keyWordDocSet = invertedIndex[keyWord]['doc id']
-        for wordEntry in invertedIndex.keys():
+        for wordEntry in kListAsSet:
             wordEntryDocSet = invertedIndex[wordEntry]['doc id']
 
             inner_product = sum({docID:keyWordDocSet[docID].get('tf-idf',0)*wordEntryDocSet[docID].get('tf-idf',0) \
@@ -17,19 +28,20 @@ def wordBasedCorrelation(invertedIndex, docTable):
                 else:
                     wordBasedCorrelationDic[keyWord].append([wordEntry, inner_product])
 
-        # print(wordBasedCorrelationDic)
-    #print(wordBasedCorrelationDic)
-    return wordBasedCorrelationDic
-    # for item, value in wordBasedCorrelationDic.items():
-    #     print(str(item), sorted(value, key = lambda x: x[1], reverse=True))
+    correlatedWords = []
+    for key in wordBasedCorrelationDic:
+        correlatedWords.append(wordBasedCorrelationDic[key])
+    correlatedWords = sum(correlatedWords,[])
+    correlatedWords = sorted(correlatedWords, key = lambda x: x[1], reverse=True)
+    correlatedWords = [word[0] for word in correlatedWords if word[0] not in stop_words and word[0] not in query][:10]
 
-def docBasedCorrelation(docTable):
-    # topPagesA = [page[0] for page in rankedDocList]
-    # print(topPagesA)
+    return correlatedWords
+
+def docBasedCorrelation(docTable, top_docs):
     documenCorrelation = {}
-    for docID in docTable.keys():
-        docIDName = docID
-        docID = docTable[docID]['extended table']
+    for docID in top_docs[:5]:
+        docIDName = docID[0]
+        docID = docTable[docID[0]]['extended table']
 
         for docIDEntry in docTable.keys():
             docIDEntryName = docIDEntry
@@ -42,15 +54,11 @@ def docBasedCorrelation(docTable):
                     documenCorrelation[docIDName] = [[docIDEntryName, inner_product]]
                 else:
                     documenCorrelation[docIDName].append([docIDEntryName, inner_product])
-            # if docID not in documenCorrelation:
-            #     #topPagesAset = set(docTable[])
-            #     documenCorrelation[docID] = docTable[['extended table']]
-            # else:
-            #     continue
-    for item, value in documenCorrelation.items():
-        print(str(item), sorted(value, key = lambda x: x[1], reverse=True))
-    # print(docID)
-    # print(docTable[docID])
-    print("---proof")
-    for item, value in docTable.items():
-        print(str(item), value['extended table'])
+    correlatedDocs = []
+    for key in documenCorrelation:
+        correlatedDocs.append(documenCorrelation[key])
+    correlatedDocs = sum(correlatedDocs,[])
+    correlatedDocs = sorted(correlatedDocs, key = lambda x: x[1], reverse=True)
+
+    return correlatedDocs
+
