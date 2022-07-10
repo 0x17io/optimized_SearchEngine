@@ -12,7 +12,7 @@ from collections import deque
 from datetime import datetime
 from query_operations import searchFunctions
 from correlation_optimizations import correlations
-archive = ZipFile('cheDoc.zip', 'r')
+archive = ZipFile('rhf.zip', 'r')
 
 # Top 100 most frequently used words (excluding or, and, but). source wiki
 stop_words = ['the', 'be', 'to', 'of', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he',
@@ -33,8 +33,8 @@ visitedURLs = set()
 def buildIndexTables(root='rhf/index.html'):
 
     # Load starting file.
-    #queueFIFO.append(root)
-    queueFIFO.extend(archive.namelist())
+    queueFIFO.append(root)
+    #queueFIFO.extend(archive.namelist())
 
     while queueFIFO:
 
@@ -127,42 +127,76 @@ def webSearch(invertedIndex, docTable):
     :return:
     """
     print("Now the search beings:")
-    searchEntry = input("enter a search key=>")
+    searchEntry = "Starting"
     while (searchEntry != ""):
+        searchEntry = input("enter a search key=>")
         # Check for phrasal first.
         if "\"" in searchEntry:
             print("Preforming phrasal search...")
+            # Initial Phrasal Search
             top_docs, query = searchFunctions.phrasalSearch(searchEntry, invertedIndex, docTable)
 
-            # Refine Query based on top 5 keywords
-            redefinedQuery = correlations.wordBasedCorrelation(query,invertedIndex,docTable,top_docs)
-            top_docs, query = searchFunctions.booleanSearch(redefinedQuery, invertedIndex, docTable)
+            # extract top correlated words, ignoring stop words.
+            top_correlated_words =correlations.wordBasedCorrelation(inverted_index, query, top_docs, docTable)
 
-            # Refine recommendation based on 5 top pages
-            top_docs = correlations.docBasedCorrelation(query, invertedIndex, docTable, top_docs)
-            print(top_docs)
+            # extract documents that match top correlated words (using or function by default)
+            top_docs_CorreKeys, querySecondRun = searchFunctions.booleanSearch(top_correlated_words, invertedIndex, docTable)
+
+            correlated_Docs = correlations.docBasedCorrelation(docTable, top_docs)
+
+            try:
+                print(top_docs[10])
+                print(top_docs_CorreKeys[10])
+                print(correlated_Docs[10])
+            except:
+                print(top_docs)
+                print(top_docs_CorreKeys)
+                print(correlated_Docs)
+
         elif len(searchEntry.split()) == 1:
             print("Only searching for one word...")
+
+            # Initial Boolean Search
             top_docs, query = searchFunctions.booleanSearch(searchEntry, invertedIndex, docTable)
 
-            # Refine Query based on top 5 keywords
-            redefinedQuery = correlations.wordBasedCorrelation(query, invertedIndex, docTable, top_docs)
-            top_docs, query = searchFunctions.booleanSearch(redefinedQuery, invertedIndex, docTable)
+            # extract top correlated words, ignoring stop words.
+            top_correlated_words =correlations.wordBasedCorrelation(inverted_index, query, top_docs, docTable)
 
-            # Refine recommendation based on 5 top pages
-            top_docs = correlations.docBasedCorrelation(query, invertedIndex, docTable, top_docs)
-            print(top_docs)
+            # extract documents that match top correlated words (using or function by default)
+            top_docs_CorreKeys, querySecondRun = searchFunctions.booleanSearch(top_correlated_words, invertedIndex, docTable)
 
+            correlated_Docs = correlations.docBasedCorrelation(docTable, top_docs)
+
+            try:
+                print(top_docs[10])
+                print(top_docs_CorreKeys[10])
+                print(correlated_Docs[10])
+            except:
+                print(top_docs)
+                print(top_docs_CorreKeys)
+                print(correlated_Docs)
         else:
             print("Preforming boolean search...")
-            top_docs, query = searchFunctions.booleanSearch(searchEntry, invertedIndex, docTable)
-            # Refine Query based on top 5 keywords
-            redefinedQuery = correlations.wordBasedCorrelation(query, invertedIndex, docTable, top_docs)
-            top_docs, query = searchFunctions.booleanSearch(redefinedQuery, invertedIndex, docTable)
 
-            # Refine recommendation based on 5 top pages
-            top_docs = correlations.docBasedCorrelation(query, invertedIndex, docTable, top_docs)
-            print(top_docs)
+            # Initial Boolean Search
+            top_docs, query = searchFunctions.booleanSearch(searchEntry, invertedIndex, docTable)
+
+            # extract top correlated words, ignoring stop words.
+            top_correlated_words =correlations.wordBasedCorrelation(inverted_index, query, top_docs, docTable)
+
+            # extract documents that match top correlated words (using or function by default)
+            top_docs_CorreKeys, querySecondRun = searchFunctions.booleanSearch(top_correlated_words, invertedIndex, docTable)
+
+            correlated_Docs = correlations.docBasedCorrelation(docTable, top_docs)
+
+            try:
+                print(top_docs[10])
+                print(top_docs_CorreKeys[10])
+                print(correlated_Docs[10])
+            except:
+                print(top_docs)
+                print(top_docs_CorreKeys)
+                print(correlated_Docs)
         searchEntry = input("enter a search key=>")
     print("Bye")
 
@@ -174,26 +208,14 @@ if __name__ == '__main__':
     start_time = datetime.now()
     buildIndexTables()
     end_time = datetime.now()
-
+    print(end_time - start_time)
 
     # for key, value in document_table.items():
     #     print(key)
     #     print(value)
-    print(document_table['cheDoc/d1.html']['extended table'])
-    print(document_table['cheDoc/d2.html']['extended table'])
-    firstEntry = document_table['cheDoc/d1.html']['extended table']
-    secondEntry = document_table['cheDoc/d2.html']['extended table']
-    part1 = set(document_table['cheDoc/d1.html']['extended table'].keys())
-    part2 = set(document_table['cheDoc/d2.html']['extended table'].keys())
 
 
-    print(set(document_table['cheDoc/d1.html']['extended table'].keys()))
-    print(set(document_table['cheDoc/d2.html']['extended table'].keys()))
-
-    combiend = part1 & part2
-
-
-
-    #webSearch(inverted_index,document_table)
+    #correlations.docBasedCorrelation(document_table)
+    webSearch(inverted_index,document_table)
 
 
