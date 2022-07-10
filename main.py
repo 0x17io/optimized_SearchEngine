@@ -145,9 +145,9 @@ def webSearch(invertedIndex, docTable):
             correlated_Docs = correlations.docBasedCorrelation(docTable, top_docs)
 
             try:
-                print(top_docs[10])
-                print(top_docs_CorreKeys[10])
-                print(correlated_Docs[10])
+                print(top_docs[:10])
+                print(top_docs_CorreKeys[:10])
+                print(correlated_Docs[:10])
             except:
                 print(top_docs)
                 print(top_docs_CorreKeys)
@@ -168,9 +168,9 @@ def webSearch(invertedIndex, docTable):
             correlated_Docs = correlations.docBasedCorrelation(docTable, top_docs)
 
             try:
-                print(top_docs[10])
-                print(top_docs_CorreKeys[10])
-                print(correlated_Docs[10])
+                print(top_docs[:10])
+                print(top_docs_CorreKeys[:10])
+                print(correlated_Docs[:10])
             except:
                 print(top_docs)
                 print(top_docs_CorreKeys)
@@ -180,7 +180,7 @@ def webSearch(invertedIndex, docTable):
 
             # Initial Boolean Search
             top_docs, query = searchFunctions.booleanSearch(searchEntry, invertedIndex, docTable)
-
+            print(top_docs)
             # extract top correlated words, ignoring stop words.
             top_correlated_words =correlations.wordBasedCorrelation(inverted_index, query, top_docs, docTable)
 
@@ -190,9 +190,9 @@ def webSearch(invertedIndex, docTable):
             correlated_Docs = correlations.docBasedCorrelation(docTable, top_docs)
 
             try:
-                print(top_docs[10])
-                print(top_docs_CorreKeys[10])
-                print(correlated_Docs[10])
+                print(top_docs[:10])
+                print(top_docs_CorreKeys[:10])
+                print(correlated_Docs[:10])
             except:
                 print(top_docs)
                 print(top_docs_CorreKeys)
