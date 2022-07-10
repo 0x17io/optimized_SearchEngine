@@ -152,6 +152,7 @@ def booleanSearch(query, invertedIndex, docTable):
             for word in query:
                 if word != "or":
                     relevantDocs.append(list(invertedIndex[word]['doc id'].keys()))
+
             relevantDocs = list(set(sum(list(relevantDocs), [])))
 
             finalRanking = {}
