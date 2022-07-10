@@ -62,3 +62,4 @@ def docBasedCorrelation(docTable, top_docs):
 
     return correlatedDocs
 
+# fixed prior issue
