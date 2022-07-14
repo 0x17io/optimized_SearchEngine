@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>zeeSearchEngine</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/styles.css') }}">
+</head>
+
+<body>
+    <h1>zeeSearchEngine</h1>
+    <p>
+        <form class = "grid" action="/result" method="POST">
+                <input type="text" name="query" id = "queryEntry"> <input type="Submit">
+            </form>
+        </p>
+    <p>
+
+        {% if queryEntry %}
+        <i>Showing results for {{ queryEntry }}. Top 5 documents are used for keyword extraction and document correlation.</i>
+
+        {% if badWord %}
+    <p style="color:#8B0000; font-style:italic">Search Not Available. Unable to find <b>{{badWord}}</b> in our Index Table. We suggest you remove
+    from the query.</p>
+        {% else %}
+    <br>
+
+        {% for key, value in results_to_print.items() %}
+        <h3>{{key}}</h3>
+            {% for entry in value %}
+                <p><h6>Ranking Score: {{entry[1]}} </h6>{{entry[2]}} <a href="{{''.join(['https://',entry[0][4:]] ) }}">{{entry[0][4:]}}"</a>
+                </p>
+            {% endfor %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+    </p>
+
+</body>
+</html>
