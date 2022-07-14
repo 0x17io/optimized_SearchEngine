@@ -3,4 +3,4 @@
 ### Date: Summer I 2022
 #### Short Description: Vector based search engine implementation using an inverted index tables.
 
-This project implementation was based on web crawling a given zip file composed of 17.9 MB worth of data containging various linked htm and html files. This zipfile is not provided due to copyright.
+Vector search engine project implementation taking a web crawling based approach on given zip file composed of 17.9 MB worth of data containing various linked htm and html files. This zipfile is not provided due to copyright.
